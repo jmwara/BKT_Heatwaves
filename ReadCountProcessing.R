@@ -79,7 +79,7 @@ ggplot(data=salmon.pca$c1, aes(x=CS3, y=CS4, color=trout_enviro_data_filtered.df
   theme_classic()+ #change the plot theme
   labs(x="PC3 (0.9%)", y="PC2 (0.7%)", color="Sample Site") #set axis and legend titles
 
-trout_enviro_data.df <- left_join(data.frame(Sample_ID=(colnames(salmon_counts[,-c(1,55)]))), trout_enviro_data_filtered.df, by="Sample_ID") #add sample ID names to the environmental data data frame
+trout_enviro_data.df <- left_join(data.frame(Sample_ID=(colnames(salmon_counts[,-c(1,56)]))), trout_enviro_data_filtered.df, by="Sample_ID") #add sample ID names to the environmental data data frame
 salmon_logcounts_t <- t(salmon_logcounts) #transpose the log-transformed read counts data frame (so samples are in rows, transcripts in columns)
 colnames(salmon_logcounts_t) <- salmon_counts.dge$genes$Name #add transcript names as column names to the read count data frame
 salmon_logcounts_environ.df <- right_join(trout_enviro_data.df, data.frame(Sample_ID=rownames(salmon_logcounts_t), salmon_logcounts_t), by="Sample_ID") #combine the read count and environmental variable data frames matched up by sample
