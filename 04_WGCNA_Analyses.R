@@ -14,7 +14,7 @@ library(ggtree)
 library(ggpubr)
 library(tidyr)
 
-salmon_data <- fread("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
+salmon_data <- fread("salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
 enviro_data <- salmon_data[,1:16] #create a separate data frame with just environmental data
 express_data <- salmon_data[,-(1:16)] #create a separate data frame with just expression data
 rownames(express_data) <- salmon_data$Sample_ID #name the expression data rows with sample IDs so future analyses of the expression data can be aligned to environmental data
@@ -33,12 +33,12 @@ plot(sft_signed$fitIndices$Power, -sign(sft_signed$fitIndices$slope)*sft_signed$
 plot(sft_signed$fitIndices$Power, sft_signed$fitIndices$mean.k., xlab="Soft Threshold (Power)", ylab="Mean Connectivity", type="n", main=paste("Mean Connectivity")) #plot the 
 text(sft_signed$fitIndices$Power, sft_signed$fitIndices$mean.k., labels = powers, cex=0.9, col="red")
 
-load(file="~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/BrookTroutHeatwave_netwrkConstruction_auto.RData") #read in the results of the one block network construction run on the cluster
+load(file="BrookTroutHeatwave_netwrkConstruction_auto.RData") #read in the results of the one block network construction run on the cluster
 table(moduleColors) #print the module name and the numbers of genes in each module
 plotDendroAndColors(geneTree, moduleColors, dendroLabels = F, hang=0.03, addGuide = T, guideHang = 0.05) #plot the gene expression dendrogram and the module colors from the one block network construction
 
 enableWGCNAThreads() #allow the R session to use multiple threads to construct WGCNA networks
-load("./salmonTOM-block.1.RData") #load in the TOM from the cluster session (too computationally intensive for a laptop to do in one block)
+load("salmonTOM-block.1.RData") #load in the TOM from the cluster session (too computationally intensive for a laptop to do in one block)
 salmon_signed_TOM <- TOM #rename the TOM
 #Test the effect of cut height on the modules detected
 salmon_signed_network_cH0.995 <- blockwiseModules(express_data, maxBlockSize = 35000, loadTom=salmon_signed_TOM, power=8, networkType = "signed", minModuleSize = 30, mergeCutHeight = 0.15, deepSplit = 2, detectCutHeight = 0.995) #run the module detection with detect cut height of 0.995
@@ -105,9 +105,10 @@ st_salmon_eigengene.df$Site <- as.factor(st_salmon_eigengene.df$Site) #make sure
 corrplot(cor(salmon_signed_MEs, enviro_data[,4:12])) #print a correlation plot showing direction and magnitude of correlations between module eigengenes and the environmental variables
 
 plotEigengeneNetworks(salmon_signed_MEs, setLabels = colnames(salmon_signed_MEs)) #plot the dendrogram of modules 
+save.image("WGCNA.RData")
 
-load("WCGNA.RData") #
-Phylofish_GO <- fread("./Phylofish_GOData.txt") #read in the Gene Ontology custom data frame from the Phylofish BioMart search
+load("WGCNA.RData") #if you've run the above code already, you can skip to this step 
+Phylofish_GO <- fread("Phylofish_GOData.txt") #read in the Gene Ontology custom data frame from the Phylofish BioMart search (the Phylofish_GOData.txt file supplied in this repository has alread gone through next 3 lines to filter entries, otherwise it would have been to large to include in the repository)
 Phylofish_GO_salmon <- Phylofish_GO[Phylofish_GO$Name %in% colnames(express_data),] #create a re-ordered and filtered GO data frame that matches the transcript order of the gene expression data frame
 Phylofish_GO_salmon <- Phylofish_GO_salmon[Phylofish_GO_salmon$`Go name` != "",] #remove entries with no GO data from the Gene Ontology dataset (some entries had significant alignments to known genes, but had no GO data)
 Phylofish_GO_salmon_input <- data.frame(gene=Phylofish_GO_salmon$Name, go_ID=Phylofish_GO_salmon$Code) #create a data frame with just gene IDs and GO codes to use in the GO enrichment analysis
@@ -733,7 +734,7 @@ eigentree.plot <- ggtree(eigen_tree)+ #plot the eigengene dendrogram
   geom_tiplab(aes(label=("XXXX")), linesize = 0, align=T, geom="label", color=colnames(salmon_signed_eigencolors), fill=colnames(salmon_signed_eigencolors), offset = 0.3)+ #set the tip labels to show up as blocks of color 
   theme(plot.margin=unit(c(0.2, 0, 2.8, 0.5), "cm")) #adjust plot margins
 
-gam.heat.df <- read.table("./ME_gam_heatmap.txt", header = T) #read in table of compiled P-values for all environmental variables in the GAMMs (ns p-values were made to equal 1 for easier plotting)
+gam.heat.df <- read.table("ME_gam_heatmap.txt", header = T) #read in table of compiled P-values for all environmental variables in the GAMMs (ns p-values were made to equal 1 for easier plotting)
 gam.heat.df$Eigengene <- factor(gam.heat.df$Eigengene, levels=unique(gam.heat.df$Eigengene)) #make sure the module variable in the p-value data frame is a factor in the same order as the dendrogram
 gam_heat.df <- gam.heat.df %>% as_tibble() %>% gather(key="Variable", value="p-val", Temperature:Temp.Date, factor_key = T) #create a long version of the p-value data frame
 eigen_heatplot.plot <- ggplot(data=gam_heat.df, aes(x=Variable, y=fct_rev(Eigengene), fill=-log(`p-val`)))+ #create a new ggplot object from the long p-value data frame with GAMM variables on the x axis, modules on the y axis, and colored by log transformed p-values
