@@ -8,9 +8,9 @@ library(stringr)
 library(ggplot2)
 library(ade4)
 
-salmon_files <- list.files("~/Desktop/BrookTrout_ReadCounts/salmon_counts/trimmed", pattern = "quant") #create a list of the file names with salmon read counts
+salmon_files <- list.files("./trimmed", pattern = "quant") #create a list of the file names with salmon read counts
 for(i in 1:length(salmon_files)){ #create a for loop to read in the read count files and automatically name them with the sample ID from the file name
-  readcount <- read.delim(str_c("~/Desktop/BrookTrout_ReadCounts/salmon_counts/trimmed/", salmon_files[i], "/quant.sf"))
+  readcount <- read.delim(str_c("./trimmed/", salmon_files[i], "/quant.sf"))
   assign(str_c(str_split_1(salmon_files[i], "_")[1],"_salmon.rc"), readcount)
 }
 
@@ -49,14 +49,14 @@ plotMDS(salmon_counts.dge) #create NMDS plot of salmon count data
 salmon_counts_filtered.dge <- salmon_counts.dge[,-55] #remove outlier sample EB044
 plotMDS(salmon_counts_filtered.dge) #replot NMDS without EB044 
 
-trout_enviro_data.df <- read.delim("~/Desktop/Brook_Trout_Heatwave/Brook_Trout_Heatwave_SampleSelect/trout_enviro_data.txt", sep="\t") #read in individual trout environmental variable data frame
+trout_enviro_data.df <- read.delim("trout_enviro_data.txt", sep="\t") #read in individual trout environmental variable data frame
 trout_enviro_data.df$Sample_ID <- as.factor(trout_enviro_data.df$Sample_ID) #set sample id to factor class
 trout_enviro_data.df$Date <- as.Date(trout_enviro_data.df$Date) #set sample dates to Date class
 trout_enviro_data.df$Site <- as.factor(trout_enviro_data.df$Site) #set sample site to factor class
-trout_sexes.df <- read.delim("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/BrookTrout_Sexes.txt", header = T) #read in data frame with fish sex information
+trout_sexes.df <- read.delim("BrookTrout_Sexes.txt", header = T) #read in data frame with fish sex information
 trout_enviro_data_filtered.df <- right_join(trout_enviro_data.df, data.frame(Sample_ID=rownames(salmon_counts.dge$samples)), by="Sample_ID") #combine environmental information with read counts matched up by sample ID
 trout_enviro_data_filtered.df <- left_join(trout_enviro_data_filtered.df, trout_sexes.df, by="Sample_ID") #add sex data to environmental/read count data frame, matched up by sample ID
-trout_size.df <- read.delim("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/BrookTrout_LengthWeight.txt", header=T) #read in data frame with length and weight data
+trout_size.df <- read.delim("BrookTrout_LengthWeight.txt", header=T) #read in data frame with length and weight data
 trout_enviro_data_filtered.df <- left_join(trout_enviro_data_filtered.df, trout_size.df, join_by(Sample_ID==Sample.ID), relationship = "one-to-one") #add length and weight data to environmental/read count/sex data frame matched up by sample ID
 trout_enviro_data_filtered.df <- trout_enviro_data_filtered.df[-55,] #remove outlier sample EB044
 
@@ -83,6 +83,6 @@ trout_enviro_data.df <- left_join(data.frame(Sample_ID=(colnames(salmon_counts[,
 salmon_logcounts_t <- t(salmon_logcounts) #transpose the log-transformed read counts data frame (so samples are in rows, transcripts in columns)
 colnames(salmon_logcounts_t) <- salmon_counts.dge$genes$Name #add transcript names as column names to the read count data frame
 salmon_logcounts_environ.df <- right_join(trout_enviro_data.df, data.frame(Sample_ID=rownames(salmon_logcounts_t), salmon_logcounts_t), by="Sample_ID") #combine the read count and environmental variable data frames matched up by sample
-write.table(salmon_logcounts_environ.df, file="~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/salmon_logcounts_environ.txt") #write data frame as tab-delimited text file
+write.table(salmon_logcounts_environ.df, file="salmon_logcounts_environ.txt") #write data frame as tab-delimited text file
 
 
