@@ -12,7 +12,7 @@ library(rdacca.hp)
 
 #snps.data <- read_vcf("populations.snps.vcf") #read in vcf file from Stacks
 #snps_filtered.data <- filter_rad(snps.data) #run the radiator filters, see manuscript for values
-snps_filtered.data <- read_rad("filter_rad_20240506@0947/14_filtered/radiator_data_20240506@0951.rad") #read in filtered SNP dataset
+snps_filtered.data <- read_rad("radiator_data_20240506@0951.rad") #read in filtered SNP dataset
 snps_filtered.genind <- genomic_converter(snps_filtered.data, output = "genind") #convert filtered SNP dataset to genind format
 snps_filtered.genind.sum <- summary(snps_filtered.genind$genind) #create summary object of the genind (mainly to look at NA percentage)
 snps_filtered.table <- tab(snps_filtered.genind$genind, freq=T, NA.method="mean") #convert filtered SNP genind to tabular format, replace missing genotypes with the average genotype for that population
@@ -82,7 +82,7 @@ pdf(file="BTHeatwave_CoancestryMat.pdf",height=12,width=12) #create an empty pdf
 plotFinestructure(tmpmat,dimnames(tmpmat)[[1]],dend=tdend,cols=heat.colors(n=20, rev=T),cex.axis=0.6,edgePar=list(p.lwd=0,t.srt=90,t.off=-0.1,t.cex=0.8)) #add the fineradstructure coancestry heatmap to the empty pdf
 dev.off() #stop printing objects to the heatmap
 
-salmon_data <- fread("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
+salmon_data <- fread("salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
 rad_salmon_data <- salmon_data[salmon_data$Sample_ID %in% rownames(pca.snps.df), ] #filter the transcriptomic data to only retain samples that also have SNP genomic data
 enviro_data <- rad_salmon_data[,1:16] #create a separate data frame with just environmental data
 express_data <- data.frame(rad_salmon_data$QSF_AN32B.3.8, rad_salmon_data$QSF_CDC37.1.3, rad_salmon_data$QSF_CIRBP.24.24, rad_salmon_data$QSF_CIRBP.7.24, rad_salmon_data$QSF_CSF3R.3.3, rad_salmon_data$QSF_DH12A.2.2, rad_salmon_data$QSF_ES1.1.3, rad_salmon_data$QSF_HMGB2.9.11, rad_salmon_data$QSF_HS90A.1.1, rad_salmon_data$QSF_HS90B.1.1, rad_salmon_data$QSF_HSP47.2.3, rad_salmon_data$QSF_HSP47.3.3, rad_salmon_data$QSF_HSP70B.1.1, rad_salmon_data$QSF_HSPA4L.1.1, rad_salmon_data$QSF_KHDR1.2.2, rad_salmon_data$QSF_LOC100136615.4.4, rad_salmon_data$QSF_LOC100194703.44.106, rad_salmon_data$QSF_LOC100691603.1.1, rad_salmon_data$QSF_LOC100696101.2.2, rad_salmon_data$QSF_LOC100696517.1.1, rad_salmon_data$QSF_LOC100699058.1.1, rad_salmon_data$QSF_LOC101166160.1.1, rad_salmon_data$QSF_LOC101166550.1.1, rad_salmon_data$QSF_LOC562935.1.1, rad_salmon_data$QSF_P2RX4.82.83, rad_salmon_data$QSF_P4HA1.6.11, rad_salmon_data$QSF_P4HA2.1.3, rad_salmon_data$QSF_PCY2.5.29, rad_salmon_data$QSF_RO32.1.2, rad_salmon_data$QSF_SARNP.8.8, rad_salmon_data$QSF_SFRS6.2.5, rad_salmon_data$QSF_SRSF2.6.8, rad_salmon_data$QSF_TCPG.1.3, rad_salmon_data$QSF_THOC4.1.2, rad_salmon_data$QSF_TIA1.4.5, rad_salmon_data$QSF_TRA2B.3.7, rad_salmon_data$QSF_TRAD1.20.35, rad_salmon_data$QSF_TRI39.3.8, rad_salmon_data$QSF_TSC22D3.2.2, rad_salmon_data$QSF_UGT1A5.1.1, rad_salmon_data$QSF_USP9X.2.4, rad_salmon_data$QSF_VRK3.145.924, rad_salmon_data$QSF_ZGC_162825.1.2) #create a separate data frame with just expression data for the differentially expressed genes identified by ImpulseDE2
