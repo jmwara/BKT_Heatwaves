@@ -5,7 +5,7 @@ library(ggplot2)
 library(gridExtra)
 library(lubridate)
 
-temp_data <- read_excel("../2022heatwave temps.xlsx", sheet="All temp data") #read in excel sheet with all data from all temperature loggers in all four streams
+temp_data <- read_excel("2022heatwave temps.xlsx", sheet="All temp data") #read in excel sheet with all data from all temperature loggers in all four streams
 colnames(temp_data) <- c("Site", "Logger", "Date", "Temp") #rename the columns so they are easier to work with
 temp_data_water.df <- temp_data[temp_data$Logger!="SCA_Air" & temp_data$Logger!="EB_Air" & temp_data$Logger!="BP_Air" & temp_data$Logger!="SS_Air",] #create a data frame with only the water temperature 
 temp_data_water_avg.df <- temp_data_water.df %>% group_by(Date, Site) %>% summarise(Temp = mean(Temp)) #average temperatures collected at the same time point across loggers from the same stream 
@@ -43,8 +43,8 @@ ggplot(data=temp_data_water_dailysd.df, aes(x=Date, y=Temp, color=Site))+ #creat
 daily_temps.df <- left_join(temp_data_water_dailyavg.df, temp_data_water_dailymax.df, by=c("Date", "Site"), suffix=c(".avg", ".max")) #create a data frame that combines the average and maximum temperatures matched to each time point recorded from all four streams
 write.table(daily_temps.df, file="BrookTrout_Heatwaves_DailyTemps.txt", quote=F, row.names = F, sep="\t") #save the data frame as a tab-delimited text file
 
-trout_field_data.df <- read_excel("../2022 trout sampling data.xlsx", sheet="HW trout field data") #read in data sheet for individual fish with information on where and when they were sampled
-trout_RNA_QC.df <- read_excel("../2022 trout sampling data.xlsx", sheet="RNA QC") #read in data sheet for individual fish with RNA quality control data and sexing assay results
+trout_field_data.df <- read_excel("2022 trout sampling data.xlsx", sheet="HW trout field data") #read in data sheet for individual fish with information on where and when they were sampled
+trout_RNA_QC.df <- read_excel("2022 trout sampling data.xlsx", sheet="RNA QC") #read in data sheet for individual fish with RNA quality control data and sexing assay results
 trout_sample_data.df <- left_join(trout_RNA_QC.df, trout_field_data.df, by="Sample ID") #merge the field data information with the RNA QC data for all fish that have RNA extracted
 trout_sample_data.df <- trout_sample_data.df[trout_sample_data.df$Species=="Brook",] #only keep brook trout samples
 date(trout_sample_data.df$`Bucket Begin`) <- trout_sample_data.df$Date #replace the default date (Jan 1, 1899) that R adds to times without dates in the "Bucket Begin" column with the sampling date from the "Date" column
