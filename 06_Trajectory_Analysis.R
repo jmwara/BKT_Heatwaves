@@ -11,7 +11,7 @@ library(WGCNA)
 library(GOfuncR)
 library(ggpubr)
 
-salmon_data <- fread("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
+salmon_data <- fread("salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
 enviro_data <- salmon_data[-30,1:16] #create a separate data frame with just environmental data; remove an outlier BP075
 express_data <- salmon_data[-30,-(1:16)] #create a separate data frame with just expression data; remove an outlier BP075 
 rownames(express_data) <- salmon_data$Sample_ID[-30] #name the expression data rows with sample IDs so future analyses of the expression data can be aligned to environmental data
@@ -201,7 +201,7 @@ traj1_siggenes_down <- colnames(temp_traj.loadings[,temp_traj.loadings[1,] < 0])
 traj2_siggenes_up <- colnames(temp_traj.loadings[,temp_traj.loadings[1,] > 0])[colnames(temp_traj.loadings[,temp_traj.loadings[1,] > 0]) %in% traj2_siggenes] #split the list of genes related to PC2 into positively correlated
 traj2_siggenes_down <- colnames(temp_traj.loadings[,temp_traj.loadings[1,] < 0])[colnames(temp_traj.loadings[,temp_traj.loadings[1,] < 0]) %in% traj2_siggenes] #and negatively correlated
 
-Phylofish_GO <- fread("./Phylofish_GOData.txt") #read in Phylofish gene ontology data frame
+Phylofish_GO <- fread("Phylofish_GOData.txt") #read in Phylofish gene ontology data frame
 Phylofish_GO_salmon <- Phylofish_GO[Phylofish_GO$Name %in% colnames(express_data),] #filter the GO data frame to only include transcripts used in the analysis
 Phylofish_GO_salmon <- Phylofish_GO_salmon[Phylofish_GO_salmon$`Go name` != "",] #remove records with no associated GO terms
 Phylofish_GO_salmon_input <- data.frame(gene=Phylofish_GO_salmon$Name, go_ID=Phylofish_GO_salmon$Code) #create a simplified data frame of the GO terms to input into the go_enrich function
