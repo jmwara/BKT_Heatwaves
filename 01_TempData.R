@@ -176,6 +176,21 @@ for(i in 1:nrow(sample_event_tempvars.df)){
 }
 
 sample_event_tempvars.df <- sample_event_tempvars.df[-c(3,4,7,8,15,17,19,21,23,25,26,30,31,33,35,36,38,42,48,50,52,53,55,56,58,59,62,63),] #remove records of sampled brook trout that were not selected for sequencing
+trout_enviro_data <- data.frame(Sample_ID=trout_field_data.df$`Sample ID`, Date=as.Date(trout_field_data.df$Date), Site=trout_field_data.df$Site, Weight=trout_field_data.df$`Weight (g)`, Length=trout_field_data.df$`Length (mm)`) #create a data frame with basic field observations for each sampled individual
+trout_enviro_data$Site <- sub("Shaver's Creek Above", "Shaver's Creek", trout_enviro_data$Site) #edit the site name for Shaver's Creek so it matches the site name in the data frame with temperature logger data
+sample_event_tempvars.df$Date <- as.Date(sample_event_tempvars.df$Sample_Time) #create a Date column based on the sampling time in the sampling event data frame to make pairing observations easier
+trout_enviro_data.df <- left_join(trout_enviro_data, sample_event_tempvars.df, by=join_by(Date, Site)) #add temperature data to the data frame with field observations for each sampled individual 
+for(i in 1:nrow(trout_enviro_data.df)){ #create a for loop to add a Sampling Period variable (sequence of samples - used to match up similar points in the heatwave across different streams)
+  trout_enviro_data.df$Sample_Period[i] <- if(trout_enviro_data.df$Date[i]==as.Date("2022-07-19") | trout_enviro_data.df$Date[i]==as.Date("2022-07-20")) 1 else 
+    if(trout_enviro_data.df$Date[i]==as.Date("2022-07-22") | trout_enviro_data.df$Date[i]==as.Date("2022-07-23")) 2 else 
+      if(trout_enviro_data.df$Date[i]==as.Date("2022-07-26") | trout_enviro_data.df$Date[i]==as.Date("2022-07-27")) 3 else 
+        if(trout_enviro_data.df$Date[i]==as.Date("2022-08-01") | trout_enviro_data.df$Date[i]==as.Date("2022-08-02")) 4 else 
+          if(trout_enviro_data.df$Date[i]==as.Date("2022-08-04") | trout_enviro_data.df$Date[i]==as.Date("2022-08-05")) 5 else
+            if(trout_enviro_data.df$Date[i]==as.Date("2022-08-08") | trout_enviro_data.df$Date[i]==as.Date("2022-08-09")) 6 else
+              if(trout_enviro_data.df$Date[i]==as.Date("2022-08-11") | trout_enviro_data.df$Date[i]==as.Date("2022-08-12")) 7 else 8
+}
+trout_enviro_out <- data.frame(Sample_ID=trout_enviro_data.df$Sample_ID, Date=trout_enviro_data.df$Date, Site=trout_enviro_data.df$Site, Weight=trout_enviro_data.df$Weight, Length=trout_enviro_data.df$Length, DailyAvgTemp=trout_enviro_data.df$OneDayMean, DailyMaxTemp=trout_enviro_data.df$OneDayMax, DailyTempSD=trout_enviro_data.df$OneDayVar, `24h_TempChange`=trout_enviro_data.df$OneDayChange, `72h_TempChange`=trout_enviro_data.df$ThreeDayChange, `24h_Stress`=trout_enviro_data.df$OneDayStress, `72h_Stress`=trout_enviro_data.df$ThreeDayStress, Sample_Period=trout_enviro_data.df$Sample_Period) #create a data frame with field and temperature data associated with each sampled individual
+write.table(trout_enviro_out, "trout_enviro_data.df", col.names = colnames(trout_enviro_out), row.names = F, sep="\t") #write tab-delimited text file with field and temperature data associated with each individual sampled
 
 #Under/over temperature graphs centered on 20º C, roughly the temp where brook trout begin to be thermally stressed
 watertemp_underover_stress_SS.plot <- ggplot(data=temp_data_water_avg.df[temp_data_water_avg.df$Site=="Standing Stone",], aes(x=Date, y=Temp))+ #create ggplot with date on the x-axis, temperature on the y-axis
