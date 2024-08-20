@@ -12,13 +12,13 @@ library(gridExtra)
 library(WGCNA)
 library(ggpubr)
 
-salmon_data <- fread("~/Desktop/BrookTrout_ReadCounts/BrookTrout_ReadCounts/salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
+salmon_data <- fread("salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
 enviro_data <- salmon_data[,1:16] #create a separate data frame with just environmental data
 express_data <- salmon_data[,-(1:16)] #create a separate data frame with just expression data
 rownames(express_data) <- salmon_data$Sample_ID #name the expression data rows with sample IDs so future analyses of the expression data can be aligned to environmental data
-salmon_files <- list.files("~/Desktop/BrookTrout_ReadCounts/salmon_counts/trimmed", pattern = "quant") #create a list of the file names with salmon read counts
+salmon_files <- list.files("trimmed", pattern = "quant") #create a list of the file names with salmon read counts
 for(i in 1:length(salmon_files)){ #create a for loop to read in the read count files and automatically name them with the sample ID from the file name
-  readcount <- read.delim(str_c("~/Desktop/BrookTrout_ReadCounts/salmon_counts/trimmed/", salmon_files[i], "/quant.sf"))
+  readcount <- read.delim(str_c("trimmed/", salmon_files[i], "/quant.sf"))
   assign(str_c(str_split_1(salmon_files[i], "_")[1],"_salmon.rc"), readcount)
 }
 
@@ -51,7 +51,7 @@ row.names(sample_annot2) <- sample_annot2$Sample #copy sample ids in the sample 
 
 heatwavept.riverbatch.iDE2test <- runImpulseDE2(matCountData = salmon_counts_filtered.int, dfAnnotation = sample_annot2, boolCaseCtrl = F, vecConfounders = c("Batch"), scaNProc = 1, scaQThres = 0.05) #run ImpulseDE2 with streams as confounders and corresponding time points from the two heatwaves as replicates 
 heatwave.riverbatch.impulse.plots <- plotGenes(scaNTopIDs = 43, objectImpulseDE2 = heatwavept.riverbatch.iDE2test, boolCaseCtrl = F)
-print(heatwave.riverbatch.impulse.plots[[16]])
+print(heatwave.riverbatch.impulse.plots[[16]]) #you can change the number in the double brackets to any integer from 1 to 43 to view results for different DE genes
 
 heatwave_DEgenes.vec <- heatwavept.riverbatch.iDE2test@vecDEGenes #get a vector of the significantly differentially expressed gene names
 
