@@ -48,40 +48,6 @@ snps.genpop <- genind2genpop(snps_filtered.genind$genind, pop=as.factor(c(rep("B
 snps_hclust <- hclust(dist.genpop(snps.genpop, method=1), method="average") #calculate UPGMA tree for populations
 plot(snps_hclust) #view a quick plot the the UPGMA tree
 
-strata <- data.frame(INDIVIDUALS=rownames(pca.snps.df), STRATA=pca.snps.df$Site) #create a strata file for radiator (just data frame with two columns Individuals with individual IDs and Strata with population name)
-write_fineradstructure(snps_filtered.data, strata=strata) #write a fineradstructure input file
-
-#RUN FINERADSTRUCTURE AND READ IN FINERADSTRUCTURE PLOTTING LIBRARIES (DOWNLOAD FROM FINERADSTRUCTURE SITE)
-
-chunkfile <- "populations.haps_chunks.out" #read in fineradstructure output chunks file
-mcmcfile <- "populations.haps_chunks.mcmc.xml" #read in fineradstructure output Markov chain Monte Carlo 
-treefile <- "populations.haps_chunks.mcmcTree.xml" #read in fineradstructure output Markov chain Monte Carlo tree 
-
-dataraw<-as.matrix(read.table(chunkfile,row.names=1,header=T,skip=1)) # read in the pairwise coincidence 
-mcmcxml<-xmlTreeParse(mcmcfile) ## read into xml format
-mcmcdata<-as.data.frame.myres(mcmcxml) ## convert this into a data frame
-treexml<-xmlTreeParse(treefile) ## read the tree as xml format
-ttree<-extractTree(treexml) ## extract the tree into ape's phylo format
-ttree$node.label[ttree$node.label=="1"] <-""
-## And reduce the amount of significant digits printed:
-ttree$node.label[ttree$node.label!=""] <-format(as.numeric(ttree$node.label[ttree$node.label!=""]),digits=2)
-
-tdend<-myapetodend(ttree,factor=1) # convert to dendrogram format
-pdf(file="BTHeatwave_FineRAD_FullDendrogram.pdf",height=6,width=14) #create an empty pdf file
-par(mar=c(6,0,2,0),mfrow=c(1,1)) #set the margins for printing plots to the pdf file
-plot(tdend,horiz=FALSE,nodePar=list(cex=0,lab.cex=0.6),edgePar=list(p.lwd=0,t.srt=90,t.off=-0.5),axes=F) #add dendrogram to the pdf
-dev.off() #stop printing object to the pdf
-
-fullorder<-labels(tdend) # the order according to the tree
-datamatrix<-dataraw[fullorder,fullorder] # reorder the data matrix
-
-tmatmax<-500 # cap the heatmap
-tmpmat<-datamatrix #create a copy of the data frame used to make the fineradstrucutre heatmap
-tmpmat[tmpmat>tmatmax]<-tmatmax #replace really high values in the fineradstructure heatmap with the heatmap cap
-pdf(file="BTHeatwave_CoancestryMat.pdf",height=12,width=12) #create an empty pdf
-plotFinestructure(tmpmat,dimnames(tmpmat)[[1]],dend=tdend,cols=heat.colors(n=20, rev=T),cex.axis=0.6,edgePar=list(p.lwd=0,t.srt=90,t.off=-0.1,t.cex=0.8)) #add the fineradstructure coancestry heatmap to the empty pdf
-dev.off() #stop printing objects to the heatmap
-
 salmon_data <- fread("salmon_logcounts_environ.txt", drop=1) #read in dataset with environmental and expression data
 rad_salmon_data <- salmon_data[salmon_data$Sample_ID %in% rownames(pca.snps.df), ] #filter the transcriptomic data to only retain samples that also have SNP genomic data
 enviro_data <- rad_salmon_data[,1:16] #create a separate data frame with just environmental data
